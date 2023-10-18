@@ -9,16 +9,6 @@ export const routes = [
     method: "GET",
     path: buildRoutePath("/tasks"),
     handler: (req, res) => {
-      /*const { search } = req.query;
-      const tasks = database.select(
-        "tasks",
-        search
-          ? {
-              name: search,
-              email: search,
-            }
-          : null
-      );*/
       const tasks = database.select("tasks", null);
 
       return res.end(JSON.stringify(tasks));
@@ -29,6 +19,13 @@ export const routes = [
     path: buildRoutePath("/tasks"),
     handler: (req, res) => {
       const { title, description } = req.body;
+      if (!title || !description) {
+        return res.writeHead(400).end(
+          JSON.stringify({
+            error: "title and description are required properties",
+          })
+        );
+      }
       const task = {
         id: randomUUID(),
         title,
@@ -48,6 +45,21 @@ export const routes = [
     handler: (req, res) => {
       const { id } = req.params;
       const { title, description } = req.body;
+      if (!title || !description) {
+        return res.writeHead(400).end(
+          JSON.stringify({
+            error: "title and description are required properties",
+          })
+        );
+      }
+      const doesIdExists = database.select("tasks", null, id);
+      if (!doesIdExists) {
+        return res.writeHead(404).end(
+          JSON.stringify({
+            error: "There is no task with the provided id.",
+          })
+        );
+      }
       database.update("tasks", id, {
         title,
         description,
@@ -62,6 +74,14 @@ export const routes = [
     path: buildRoutePath("/tasks/:id/complete"),
     handler: (req, res) => {
       const { id } = req.params;
+      const doesIdExists = database.select("tasks", null, id);
+      if (!doesIdExists) {
+        return res.writeHead(404).end(
+          JSON.stringify({
+            error: "There is no task with the provided id.",
+          })
+        );
+      }
       database.update("tasks", id, {
         completed_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
@@ -75,6 +95,14 @@ export const routes = [
     path: buildRoutePath("/tasks/:id"),
     handler: (req, res) => {
       const { id } = req.params;
+      const doesIdExists = database.select("tasks", null, id);
+      if (!doesIdExists) {
+        return res.writeHead(404).end(
+          JSON.stringify({
+            error: "There is no task with the provided id.",
+          })
+        );
+      }
       database.delete("tasks", id);
 
       return res.writeHead(204).end();

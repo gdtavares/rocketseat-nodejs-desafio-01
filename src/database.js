@@ -19,7 +19,7 @@ export class Database {
     fs.writeFile(databasePath, JSON.stringify(this.#database));
   }
 
-  select(table, search) {
+  select(table, search, id) {
     let data = this.#database[table] ?? [];
 
     if (search) {
@@ -28,6 +28,14 @@ export class Database {
           return row[key].toLowerCase().includes(value.toLowerCase());
         });
       });
+    }
+
+    if (id) {
+      const rowIndex = data.findIndex((row) => row.id === id);
+      if (rowIndex > -1) {
+        return this.#database[table][rowIndex];
+      }
+      return null;
     }
 
     return data;
@@ -46,7 +54,6 @@ export class Database {
     const rowIndex = this.#database[table].findIndex((row) => row.id === id);
 
     if (rowIndex > -1) {
-      console.log(this.#database[table][rowIndex]);
       this.#database[table][rowIndex] = {
         ...this.#database[table][rowIndex],
         ...data,

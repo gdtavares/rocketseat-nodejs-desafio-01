@@ -19,6 +19,7 @@ export const routes = [
     path: buildRoutePath("/tasks"),
     handler: (req, res) => {
       const { title, description } = req.body;
+      console.log("dados: ", title, description);
       if (!title || !description) {
         return res.writeHead(400).end(
           JSON.stringify({
